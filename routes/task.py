@@ -9,7 +9,17 @@ task = APIRouter()
 
 @task.get("/tasks", response_model=list[Task])
 def get_tasks():
-    return conn.execute(tasks.select()).fetchall()
+    tasks_data = conn.execute(tasks.select()).fetchall()
+
+    return [
+        {
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "created_at": task.created_at
+        }
+        for task in tasks_data
+    ]
 
 
 @task.post("/tasks", response_model=Task)
@@ -48,8 +58,7 @@ def get_task(id: int):
             "id": found_task.id,
             "title": found_task.title,
             "description": found_task.description,
-            "created_at": found_task.created_at,
-            "updated_at": found_task.updated_at
+            "created_at": found_task.created_at
         }
     else:
         return Response(status_code=HTTP_404_NOT_FOUND)
@@ -80,6 +89,7 @@ def update_task(id: int, task: Task):
         "id": updated_task_data.id,
         "title": updated_task_data.title,
         "description": updated_task_data.description,
+        "created_at": updated_task_data.created_at,
         "updated_at": updated_task_data.updated_at
     }
 
