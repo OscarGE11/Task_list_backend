@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, Response
 from config.db import conn
 from models.task import tasks
-from schemas.task import Task
+from schemas.task import Task, TaskCreate
 from starlette.status import HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_201_CREATED
 task = APIRouter()
 
@@ -23,7 +23,7 @@ def get_tasks():
 
 
 @task.post("/tasks", response_model=Task)
-def create_task(task: Task):
+def create_task(task: TaskCreate):
     new_task = {
         "title": task.title,
         "description": task.description,
