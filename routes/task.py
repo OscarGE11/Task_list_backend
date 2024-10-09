@@ -1,5 +1,5 @@
 from datetime import datetime
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, HTTPException, Response
 from config.db import conn
 from models.task import tasks
 from schemas.task import Task, TaskCreate
@@ -16,7 +16,8 @@ def get_tasks():
             "id": task.id,
             "title": task.title,
             "description": task.description,
-            "created_at": task.created_at
+            "created_at": task.created_at,
+            "updated_at": task.updated_at
         }
         for task in tasks_data
     ]
@@ -44,12 +45,12 @@ def create_task(task: TaskCreate):
             "created_at": created_task.created_at
         }
     else:
-        return Response(status_code=HTTP_404_NOT_FOUND)
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                            detail="Task not found")
 
 
 @task.get("/tasks/{id}", response_model=Task)
 def get_task(id: int):
-
     found_task = conn.execute(
         tasks.select().where(tasks.c.id == id)).fetchone()
 
@@ -58,10 +59,12 @@ def get_task(id: int):
             "id": found_task.id,
             "title": found_task.title,
             "description": found_task.description,
-            "created_at": found_task.created_at
+            "created_at": found_task.created_at,
+            "updated_at": found_task.updated_at
         }
     else:
-        return Response(status_code=HTTP_404_NOT_FOUND)
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                            detail="Task not found")
 
 
 @task.put("/tasks/{id}", response_model=Task)
@@ -73,14 +76,13 @@ def update_task(id: int, task: Task):
         "updated_at": datetime.now()
     }
 
-    result = conn.execute(tasks.update().values(title=updated_task["title"],
-                                                description=updated_task["description"],
-                                                updated_at=updated_task["updated_at"]).where(
-        tasks.c.id == id))
+    result = conn.execute(tasks.update().values(
+        updated_task).where(tasks.c.id == id))
     conn.commit()
 
     if result.rowcount == 0:
-        raise Response(status_code=HTTP_404_NOT_FOUND)
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                            detail="Task not found")
 
     updated_task_data = conn.execute(tasks.select().where(
         tasks.c.id == id)).fetchone()
@@ -97,6 +99,8 @@ def update_task(id: int, task: Task):
 @task.delete("/tasks/{id}", status_code=HTTP_204_NO_CONTENT)
 def delete_task(id: int):
 
-    conn.execute(tasks.delete().where(tasks.c.id == id))
+    result = conn.execute(tasks.delete().where(tasks.c.id == id))
     conn.commit()
-    return Response(status_code=HTTP_204_NO_CONTENT)
+    if result.rowcount == 0:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND, detail="Task not found")

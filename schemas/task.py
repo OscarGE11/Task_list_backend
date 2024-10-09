@@ -15,5 +15,6 @@ class TaskCreate(BaseModel):
     title: str
     description: str
 
-    class Config:
-        orm_mode = True
+
+class Config:
+    orm_mode = True
