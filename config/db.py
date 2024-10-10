@@ -1,8 +1,9 @@
+import os
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.exc import SQLAlchemyError
 
 # Conexión con la base de datos MySQL en XAMPP
-DATABASE_URL = "mysql+pymysql://root:root@db:3306/task_list"
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 
 # Crear el motor de la base de datos
