@@ -30,9 +30,12 @@ def create_task(task: TaskCreate):
         "description": task.description,
         "created_at": datetime.now()
     }
-    result = conn.execute(tasks.insert().values(new_task))
+    result = conn.execute(tasks.insert().values(
+        new_task).returning(tasks.c.id))
     conn.commit()
     result_id = result.lastrowid
+
+    result_id = result.fetchone()[0]
 
     created_task = conn.execute(tasks.select().where(
         tasks.c.id == result_id)).fetchone()
