@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Response
 from config.db import conn
 from models.task import tasks
-from schemas.task import Task, TaskCreate
+from schemas.task import Task, TaskCreate, TaskUpdate
 from starlette.status import HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_201_CREATED
 task = APIRouter()
 
@@ -17,7 +17,8 @@ def get_tasks():
             "title": task.title,
             "description": task.description,
             "created_at": task.created_at,
-            "updated_at": task.updated_at
+            "updated_at": task.updated_at,
+            "is_done": task.is_done
         }
         for task in tasks_data
     ]
@@ -45,7 +46,9 @@ def create_task(task: TaskCreate):
             "id": created_task.id,
             "title": created_task.title,
             "description": created_task.description,
-            "created_at": created_task.created_at
+            "created_at": created_task.created_at,
+            "updated_at": created_task.updated_at,
+            "is_done": created_task.is_done
         }
     else:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
@@ -63,7 +66,8 @@ def get_task(id: int):
             "title": found_task.title,
             "description": found_task.description,
             "created_at": found_task.created_at,
-            "updated_at": found_task.updated_at
+            "updated_at": found_task.updated_at,
+            "is_done": found_task.is_done
         }
     else:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
@@ -71,11 +75,18 @@ def get_task(id: int):
 
 
 @task.put("/tasks/{id}", response_model=Task)
-def update_task(id: int, task: Task):
+def update_task(id: int, task: TaskUpdate):
+
+    db_task = conn.execute(tasks.select().where(tasks.c.id == id)).fetchone()
+
+    if db_task is None:
+        raise HTTPException(status_code=HTTP_404_NOT_FOUND,
+                            detail="Task not found")
 
     updated_task = {
-        "title": task.title,
-        "description": task.description,
+        "title": task.title if task.title is not None else db_task.title,
+        "description": task.description if task.description is not None else db_task.description,
+        "is_done": task.is_done if task.is_done is not None else db_task.is_done,
         "updated_at": datetime.now()
     }
 
@@ -95,7 +106,8 @@ def update_task(id: int, task: Task):
         "title": updated_task_data.title,
         "description": updated_task_data.description,
         "created_at": updated_task_data.created_at,
-        "updated_at": updated_task_data.updated_at
+        "updated_at": updated_task_data.updated_at,
+        "is_done": updated_task_data.is_done
     }
 
 

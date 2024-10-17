@@ -9,6 +9,10 @@ class Task(BaseModel):
     description: str
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    is_done: bool = False
+
+    class Config:
+        orm_mode = True
 
 
 class TaskCreate(BaseModel):
@@ -16,5 +20,10 @@ class TaskCreate(BaseModel):
     description: str
 
 
-class Config:
-    orm_mode = True
+class TaskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    is_done: Optional[bool] = None
+
+    class Config:
+        orm_mode = True
