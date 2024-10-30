@@ -1,5 +1,5 @@
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException
 from config.db import conn
 from models.task import tasks
 from schemas.task import Task, TaskCreate, TaskUpdate
@@ -18,7 +18,8 @@ def get_tasks():
             "description": task.description,
             "created_at": task.created_at,
             "updated_at": task.updated_at,
-            "is_done": task.is_done
+            "is_done": task.is_done,
+            "user_id": task.user_id
         }
         for task in tasks_data
     ]
@@ -29,7 +30,8 @@ def create_task(task: TaskCreate):
     new_task = {
         "title": task.title,
         "description": task.description,
-        "created_at": datetime.now()
+        "created_at": datetime.now(),
+        "user_id": task.user_id
     }
     result = conn.execute(tasks.insert().values(
         new_task).returning(tasks.c.id))
@@ -48,7 +50,8 @@ def create_task(task: TaskCreate):
             "description": created_task.description,
             "created_at": created_task.created_at,
             "updated_at": created_task.updated_at,
-            "is_done": created_task.is_done
+            "is_done": created_task.is_done,
+            "user_id": created_task.user_id
         }
     else:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
@@ -67,7 +70,8 @@ def get_task(id: int):
             "description": found_task.description,
             "created_at": found_task.created_at,
             "updated_at": found_task.updated_at,
-            "is_done": found_task.is_done
+            "is_done": found_task.is_done,
+            "user_id": found_task.user_id
         }
     else:
         raise HTTPException(status_code=HTTP_404_NOT_FOUND,
@@ -107,7 +111,8 @@ def update_task(id: int, task: TaskUpdate):
         "description": updated_task_data.description,
         "created_at": updated_task_data.created_at,
         "updated_at": updated_task_data.updated_at,
-        "is_done": updated_task_data.is_done
+        "is_done": updated_task_data.is_done,
+        "user_id": updated_task_data.user_id
     }
 
 
@@ -118,4 +123,4 @@ def delete_task(id: int):
     conn.commit()
     if result.rowcount == 0:
         raise HTTPException(
-            status_code=HTTP_404_NOT_FOUND, detail="Task not found")
+            status_code=HTTP_404_NOT_FOUND, detail="User not found")
