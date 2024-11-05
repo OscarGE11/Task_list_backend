@@ -1,15 +1,21 @@
 from datetime import datetime
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from config.db import conn
+from models import user
 from models.task import tasks
 from schemas.task import Task, TaskCreate, TaskUpdate
 from starlette.status import HTTP_204_NO_CONTENT, HTTP_404_NOT_FOUND, HTTP_200_OK, HTTP_201_CREATED
+
+from utils.auth import get_current_user
 task = APIRouter()
 
 
 @task.get("/tasks", response_model=list[Task])
-def get_tasks():
-    tasks_data = conn.execute(tasks.select()).fetchall()
+def get_tasks(current_user: str = Depends(get_current_user)):
+
+    user_id = current_user
+    tasks_data = conn.execute(tasks.select().where(
+        tasks.c.user_id == user_id.id)).fetchall()
 
     return [
         {
@@ -26,7 +32,7 @@ def get_tasks():
 
 
 @task.post("/tasks", response_model=Task)
-def create_task(task: TaskCreate):
+def create_task(task: TaskCreate, current_user: str = Depends(get_current_user)):
     new_task = {
         "title": task.title,
         "description": task.description,
@@ -59,7 +65,7 @@ def create_task(task: TaskCreate):
 
 
 @task.get("/tasks/{id}", response_model=Task)
-def get_task(id: int):
+def get_task(id: int, current_user: str = Depends(get_current_user)):
     found_task = conn.execute(
         tasks.select().where(tasks.c.id == id)).fetchone()
 
@@ -79,7 +85,7 @@ def get_task(id: int):
 
 
 @task.put("/tasks/{id}", response_model=Task)
-def update_task(id: int, task: TaskUpdate):
+def update_task(id: int, task: TaskUpdate, current_user: str = Depends(get_current_user)):
 
     db_task = conn.execute(tasks.select().where(tasks.c.id == id)).fetchone()
 
@@ -117,7 +123,7 @@ def update_task(id: int, task: TaskUpdate):
 
 
 @task.delete("/tasks/{id}", status_code=HTTP_204_NO_CONTENT)
-def delete_task(id: int):
+def delete_task(id: int, current_user: str = Depends(get_current_user)):
 
     result = conn.execute(tasks.delete().where(tasks.c.id == id))
     conn.commit()

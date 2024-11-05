@@ -1,9 +1,10 @@
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.exc import SQLAlchemyError
+import os
+from dotenv import load_dotenv
 
-
-DATABASE_URL = "postgresql://postgres:root@localhost:5432/task_list"
-
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 try:
     engine = create_engine(DATABASE_URL)
