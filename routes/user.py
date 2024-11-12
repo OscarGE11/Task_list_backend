@@ -14,7 +14,7 @@ from utils.generateToken import create_token
 user = APIRouter()
 
 
-@user.post("/register", response_model=UserResponse)
+@user.post("/register", response_model=TokenResponse)
 def register(user: UserCreate):
 
     existing_user = conn.execute(select(users).where(
