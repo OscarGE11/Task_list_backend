@@ -7,6 +7,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
+    "https://task-list-backend-1uq7.onrender.com"
 ]
 app.add_middleware(
     CORSMiddleware,

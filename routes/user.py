@@ -42,9 +42,9 @@ def register(user: UserCreate):
     response.set_cookie(
         key="access_token",
         value=token,
-        httponly=False,
+        httponly=True,
         secure=True,
-        samesite="Lax",
+        samesite="None",
         path="/"
     )
 
@@ -66,9 +66,9 @@ def login(user: UserCreate):
         response.set_cookie(
             key="access_token",
             value=token,
-            httponly=False,
+            httponly=True,
             secure=True,
-            samesite="Lax",
+            samesite="None",
             path="/"
         )
         return response
