@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 origins = [
-    "https://taskit-lemon.vercel.app"
+    "https://taskit-lemon.vercel.app", "http://localhost:3000"
 ]
 app.add_middleware(
     CORSMiddleware,
