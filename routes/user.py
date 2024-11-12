@@ -43,7 +43,7 @@ def register(user: UserCreate):
         key="access_token",
         value=token,
         httponly=False,
-        secure=False,
+        secure=True,
         samesite="Lax",
         path="/"
     )
@@ -67,7 +67,7 @@ def login(user: UserCreate):
             key="access_token",
             value=token,
             httponly=False,
-            secure=False,
+            secure=True,
             samesite="Lax",
             path="/"
         )
