@@ -48,7 +48,7 @@ def register(user: UserCreate):
         path="/"
     )
 
-    return UserResponse(id=new_user_id, email=user.email)
+    return response
 
 
 @user.post("/login", response_model=TokenResponse)
